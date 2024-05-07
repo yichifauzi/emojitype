@@ -31,6 +31,6 @@ credits="Thanks to cyborgcabbage for original mod!"
 [[dependencies.emojitype]]
     modId = "cloth_config"
     mandatory = false
-    versionRange = "[11.0.0,)"
+    versionRange = "[13.0.0,)"
     ordering = "NONE"
     side = "BOTH"
