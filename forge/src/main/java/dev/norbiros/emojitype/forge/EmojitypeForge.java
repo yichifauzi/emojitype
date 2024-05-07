@@ -2,7 +2,8 @@ package dev.norbiros.emojitype.forge;
 
 import dev.norbiros.emojitype.EmojiType;
 import dev.norbiros.emojitype.config.EmojiTypeConfig;
-import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.client.ConfigScreenHandler.ConfigScreenFactory;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 
@@ -11,6 +12,9 @@ public class EmojitypeForge {
     public EmojitypeForge() {
         EmojiType.init();
 
-        ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> EmojiTypeConfig.createConfigScreen(parent)));
+        if (ModList.get().isLoaded("cloth_config")) {
+            ModLoadingContext.get().registerExtensionPoint(ConfigScreenFactory.class,
+                    () -> new ConfigScreenFactory((client, parent) -> EmojiTypeConfig.createConfigScreen(parent)));
+        }
     }
 }
