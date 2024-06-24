@@ -19,7 +19,6 @@ subprojects {
 
         mappings loom.layered {
             it.mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-            it.mappings "dev.architectury:yarn-mappings-patch-forge:${project.forge_yarn_mappings_patch}"
             it.mappings "dev.architectury:yarn-mappings-patch-neoforge:${project.neoforge_yarn_mappings_patch}"
         }
     }
