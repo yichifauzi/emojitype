@@ -84,6 +84,7 @@ public class EmojiType {
 			add(new EmojiCode(":snowman:", "⛄"));
 			add(new EmojiCode(":storm:", "⛈"));
 			add(new EmojiCode(":snow:", "❄"));
+			add(new EmojiCode(":rain:","☔"));
 
 			// Control
 			add(new EmojiCode(":eject:", "⏏"));
