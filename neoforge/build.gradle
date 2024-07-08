@@ -1,22 +1,10 @@
-plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.2"
-}
-
 architectury {
     platformSetupLoomIde()
     neoForge()
 }
 
-configurations {
-    common
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
-    compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
-    developmentNeoForge.extendsFrom common
-}
-
 dependencies {
-    neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
+    neoForge "net.neoforged:neoforge:${project.neoforge_version}"
 
     implementation "me.shedaniel.cloth:cloth-config-neoforge:${project.cloth_config_version}"
 
@@ -24,28 +12,10 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
 }
 
-processResources {
-    filesMatching("META-INF/neoforge.mods.toml") {
-        expand "version": project.version
-    }
-}
-
-shadowJar {
-    exclude "fabric.mod.json"
-    exclude "architectury.common.json"
-
-    configurations = [project.configurations.shadowCommon]
-    archiveClassifier.set("dev-shadow")
-}
-
 remapJar {
     inputFile.set shadowJar.archiveFile
     dependsOn shadowJar
     archiveClassifier.set("neoforge")
-}
-
-jar {
-    archiveClassifier.set("dev")
 }
 
 sourcesJar {
@@ -63,13 +33,8 @@ components.java {
 publishing {
     publications {
         mavenNeoForge(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-neoforge"
+            artifactId = rootProject.mod_id + "-neoforge"
             from components.java
         }
-    }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        // Add repositories to publish to here.
     }
 }
