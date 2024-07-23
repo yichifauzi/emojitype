@@ -10,6 +10,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Mixin(SelectionManager.class)
@@ -19,24 +21,29 @@ public abstract class SelectionManagerMixin {
     private int selectionStart;
 
     @Shadow
+    private int selectionEnd;
+
+    @Shadow
     @Final
     private Supplier<String> stringGetter;
 
     @Shadow
-    public abstract void delete(int cursorOffset);
-
-    @Shadow
-    public abstract void insert(String string);
+    @Final
+    private Consumer<String> stringSetter;
 
     @Inject(method = "insert(Ljava/lang/String;Ljava/lang/String;)V", at = @At("TAIL"))
     private void inject(String _unused, String insertion, CallbackInfo ci) {
-        String text = stringGetter.get();
-        for (EmojiCode ec : EmojiType.emojiCodes) {
-            if (ec.match(text, selectionStart - 1)) {
-                delete(-ec.getCode().length());
-                insert(ec.getEmoji());
-                break;
-            }
+        String result = stringGetter.get();
+        for (EmojiCode emojiCode : EmojiType.emojiCodes) {
+            result = result.replace(emojiCode.getCode(), emojiCode.getEmoji());
         }
+
+        if (!Objects.equals(stringGetter.get(), result)) {
+            int lengthDifference = stringGetter.get().length() - result.length();
+            int newCursorPosition = Math.max(Math.min(this.selectionEnd - lengthDifference + 1, result.length()), 0);
+            this.selectionEnd = this.selectionStart = newCursorPosition;
+        }
+
+        stringSetter.accept(result);
     }
 }

@@ -9,38 +9,41 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Objects;
+
 @Mixin(TextFieldWidget.class)
 public abstract class TextFieldWidgetMixin {
     @Shadow
-    private int selectionEnd;
+    private String text;
+
     @Shadow
     private int selectionStart;
 
     @Shadow
-    public abstract void eraseCharacters(int characterOffset);
+    private int selectionEnd;
 
     @Shadow
     public abstract String getText();
 
     @Shadow
-    protected abstract int getCursorPosWithOffset(int offset);
-
-    @Shadow
-    public abstract void write(String text);
+    protected abstract void onChanged(String newText);
 
     @Inject(method = "charTyped", at = @At("RETURN"))
     private void inject(char chr, int modifiers, CallbackInfoReturnable<Boolean> cir) {
-        if (cir.getReturnValue()) {
-            int justTyped = getCursorPosWithOffset(-1);
-            for (EmojiCode ec : EmojiType.emojiCodes) {
-                if (ec.match(getText(), justTyped)) {
-                    eraseCharacters(-ec.getCode().length());
-                    //When you hold shift (which you do to type ':') it messes up when eraseCharacters trys to move the cursor back, instead extending the selection
-                    selectionEnd = selectionStart;
-                    write(ec.getEmoji());
-                    break;
-                }
-            }
+        if (!cir.getReturnValue()) return;
+
+        String result = getText();
+        for (EmojiCode emojiCode : EmojiType.emojiCodes) {
+            result = result.replace(emojiCode.getCode(), emojiCode.getEmoji());
         }
+
+        if (!Objects.equals(this.text, result)) {
+            int lengthDifference = this.text.length() - result.length();
+            int newCursorPosition = Math.max(Math.min(this.selectionEnd - lengthDifference + 1, result.length()), 0);
+            this.selectionEnd = this.selectionStart = newCursorPosition;
+        }
+
+        this.text = result;
+        this.onChanged(result);
     }
 }
